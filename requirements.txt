@@ -1,0 +1,7 @@
+uagents>=0.4.0
+hyperon>=0.1.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+asyncio
+aiohttp>=3.8.0

@@ -1,0 +1,481 @@
+/* Revenue Dashboard Styles */
+.revenue-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.dashboard-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 10px 0;
+}
+
+.dashboard-header p {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Loading and Error States */
+.loading-state, .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-state h3 {
+  color: #dc2626;
+  margin-bottom: 10px;
+}
+
+/* Contract Info Card */
+.contract-info-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 30px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.contract-info-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 20px 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-item label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-item span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.contract-address {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem !important;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+/* Revenue Summary */
+.revenue-summary {
+  margin-bottom: 30px;
+}
+
+.revenue-summary h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 20px 0;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.summary-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.card-content h4 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-content .amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+/* Token Holders */
+.token-holders-section {
+  margin-bottom: 30px;
+}
+
+.token-holders-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 20px 0;
+}
+
+.token-holders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.token-holder-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.holder-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.holder-address {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.address-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.address-value {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  background: #f3f4f6;
+  padding: 6px 10px;
+  border-radius: 6px;
+  word-break: break-all;
+  color: #1a202c;
+}
+
+.holder-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-item label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.stat-item span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.dividend-amount {
+  color: #059669 !important;
+}
+
+/* Revenue History */
+.revenue-history {
+  margin-bottom: 30px;
+}
+
+.revenue-history h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 20px 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.distribution-info {
+  flex: 1;
+}
+
+.distribution-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.project-type {
+  font-weight: 600;
+  color: #1a202c;
+  text-transform: capitalize;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.distribution-date {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.distribution-amounts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.amount-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.amount-item label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.amount-item span {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.amount-item .dividend-amount {
+  color: #059669;
+}
+
+.transaction-link {
+  margin-top: 8px;
+}
+
+.tx-link {
+  font-size: 0.875rem;
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tx-link:hover {
+  text-decoration: underline;
+}
+
+.distribution-status {
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-badge.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Empty State */
+.empty-revenue-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.empty-revenue-state h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 10px 0;
+}
+
+.empty-revenue-state > p {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0 0 30px 0;
+}
+
+.revenue-flow-info {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.revenue-flow-info h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.revenue-flow-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.revenue-flow-info li {
+  padding: 8px 0;
+  font-size: 0.95rem;
+  color: #4b5563;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .revenue-dashboard {
+    padding: 15px;
+  }
+  
+  .dashboard-header h2 {
+    font-size: 2rem;
+  }
+  
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .holder-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .distribution-amounts {
+    grid-template-columns: 1fr;
+  }
+  
+  .history-item {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .distribution-status {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+}

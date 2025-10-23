@@ -1,0 +1,32 @@
+{
+  "name": "avalanche-dividend-distributor",
+  "version": "1.0.0",
+  "description": "Avalanche Zero-Man Company Smart Contract for AVAX Dividend Distribution",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:fuji": "hardhat run scripts/deploy.js --network fuji",
+    "verify:fuji": "hardhat verify --network fuji"
+  },
+  "keywords": [
+    "avalanche",
+    "avax",
+    "dividend",
+    "smart-contract",
+    "solidity",
+    "fuji"
+  ],
+  "author": "Zero-Man Company",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@openzeppelin/contracts": "^5.4.0",
+    "ethers": "^5.8.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}
+

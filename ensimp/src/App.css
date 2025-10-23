@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f6f6f6;
+}
+
+#root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.ens-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.ens-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.agents-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.agent-card {
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.agent-card h3 {
+  margin: 0 0 6px;
+}
+
+.agent-card p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+.agent-card button {
+  padding: 8px 16px;
+  background: linear-gradient(to right, #fe6311, #ff8a3d);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.agent-card button:hover:not(.disabled) {
+  background: linear-gradient(to right, #e55a0e, #e67a35);
+  transform: translateY(-1px);
+}
+
+.agent-card button.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.agent-card .address {
+  font-family: monospace;
+  font-size: 12px;
+  color: #666;
+  word-break: break-all;
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.agent-card .error {
+  color: #e74c3c;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .agents-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .agents-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

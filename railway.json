@@ -1,0 +1,50 @@
+{
+  "$schema": "https://railway.app/schemas/cli/v2",
+  "services": [
+    {
+      "name": "ai-company-backend",
+      "repo": "zmc",
+      "buildCommand": "npm install",
+      "startCommand": "npm start",
+      "rootDirectory": ".",
+      "environmentVariables": {
+        "NODE_ENV": "production",
+        "PORT": "5000",
+        "ASI_ONE_API_KEY": "${ASI_ONE_API_KEY}",
+        "DATABASE_URL": "./database/ai_company.db",
+        "PRIVATE_KEY": "${PRIVATE_KEY}",
+        "RPC_URL": "https://api.avax.network/ext/bc/C/rpc",
+        "CONTRACT_ADDRESS": "${CONTRACT_ADDRESS}"
+      }
+    },
+    {
+      "name": "ai-company-frontend",
+      "repo": "zmc",
+      "buildCommand": "npm install && cd client && npm install && npm run build",
+      "startCommand": "cd client && npx serve -s build -l 3000",
+      "rootDirectory": ".",
+      "environmentVariables": {
+        "NODE_ENV": "production",
+        "PORT": "3000",
+        "REACT_APP_API_URL": "${RAILWAY_PUBLIC_DOMAIN_AI_COMPANY_BACKEND}",
+        "REACT_APP_BOLT_URL": "${RAILWAY_PUBLIC_DOMAIN_BOLT_DIY}"
+      }
+    },
+    {
+      "name": "bolt-diy",
+      "repo": "zmc",
+      "buildCommand": "cd bolt.diy-main && node railway-build-final.cjs",
+      "startCommand": "cd bolt.diy-main && npm run start:simple",
+      "rootDirectory": ".",
+      "environmentVariables": {
+        "NODE_ENV": "production",
+        "PORT": "5173",
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "VITE_PUBLIC_APP_URL": "${RAILWAY_PUBLIC_DOMAIN_BOLT_DIY}"
+      }
+    }
+  ]
+}
+
+
+
