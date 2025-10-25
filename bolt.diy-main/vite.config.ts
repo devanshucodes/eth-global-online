@@ -64,6 +64,15 @@ export default defineConfig((config) => {
       'OLLAMA_API_BASE_URL',
       'LMSTUDIO_API_BASE_URL',
       'TOGETHER_API_BASE_URL',
+      'ANTHROPIC_API_KEY',
+      'OPENAI_API_KEY',
+      'GROQ_API_KEY',
+      'GOOGLE_GENERATIVE_AI_API_KEY',
+      'DEEPSEEK_API_KEY',
+      'MISTRAL_API_KEY',
+      'COHERE_API_KEY',
+      'XAI_API_KEY',
+      'PERPLEXITY_API_KEY',
     ],
     css: {
       preprocessorOptions: {

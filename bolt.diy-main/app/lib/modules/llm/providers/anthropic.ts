@@ -14,6 +14,13 @@ export default class AnthropicProvider extends BaseProvider {
 
   staticModels: ModelInfo[] = [
     {
+      name: 'claude-3-haiku-20240307',
+      label: 'Claude 3 Haiku',
+      provider: 'Anthropic',
+      maxTokenAllowed: 200000,
+      maxCompletionTokens: 4096,
+    },
+    {
       name: 'claude-3-5-sonnet-20240620',
       label: 'Claude 3.5 Sonnet',
       provider: 'Anthropic',
@@ -41,35 +48,9 @@ export default class AnthropicProvider extends BaseProvider {
     settings?: IProviderSetting,
     serverEnv?: Record<string, string>,
   ): Promise<ModelInfo[]> {
-    const { apiKey } = this.getProviderBaseUrlAndKey({
-      apiKeys,
-      providerSettings: settings,
-      serverEnv: serverEnv as any,
-      defaultBaseUrlKey: '',
-      defaultApiTokenKey: 'ANTHROPIC_API_KEY',
-    });
-
-    if (!apiKey) {
-      return [];
-    }
-
-    try {
-      const anthropic = createAnthropic({ apiKey });
-      const models = await anthropic.listModels();
-      
-      return models.data
-        .filter((model: any) => model.id.startsWith('claude-'))
-        .map((model: any) => ({
-          name: model.id,
-          label: model.id.replace('claude-', 'Claude ').replace(/-/g, ' '),
-          provider: 'Anthropic',
-          maxTokenAllowed: 200000,
-          maxCompletionTokens: 8192,
-        }));
-    } catch (error) {
-      console.error('Error fetching Anthropic models:', error);
-      return [];
-    }
+    // Anthropic SDK doesn't support dynamic model listing
+    // All available models are defined in staticModels
+    return [];
   }
 
   getModelInstance: (options: {
@@ -87,7 +68,7 @@ export default class AnthropicProvider extends BaseProvider {
       defaultApiTokenKey: 'ANTHROPIC_API_KEY',
     });
     
-    const anthropic = createAnthropic({
+    const anthropic: any = createAnthropic({
       apiKey,
     });
 
