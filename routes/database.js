@@ -77,6 +77,44 @@ router.get('/companies', (req, res) => {
   });
 });
 
+// Get single company with bolt prompt
+router.get('/companies/:id', (req, res) => {
+  const { id } = req.params;
+  
+  db.get('SELECT * FROM companies WHERE id = ?', [id], (err, company) => {
+    if (err) {
+      console.error('Get company error:', err);
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    
+    if (!company) {
+      return res.status(404).json({ success: false, error: 'Company not found' });
+    }
+    
+    // Get bolt prompt for this company
+    db.get('SELECT * FROM bolt_prompts WHERE idea_id = ? ORDER BY created_at DESC LIMIT 1', [id], (err, boltPrompt) => {
+      if (err) {
+        console.error('Get bolt prompt error:', err);
+        return res.status(500).json({ success: false, error: err.message });
+      }
+      
+      res.json({ 
+        success: true, 
+        company: {
+          ...company,
+          boltPrompt: boltPrompt ? {
+            ...boltPrompt,
+            pages_required: JSON.parse(boltPrompt.pages_required || '[]'),
+            functional_requirements: JSON.parse(boltPrompt.functional_requirements || '[]'),
+            design_guidelines: JSON.parse(boltPrompt.design_guidelines || '{}'),
+            integration_needs: JSON.parse(boltPrompt.integration_needs || '[]')
+          } : null
+        }
+      });
+    });
+  });
+});
+
 // Get all token holdings with agent details
 router.get('/portfolio/all', (req, res) => {
   const query = `

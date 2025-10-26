@@ -6,7 +6,8 @@ const sqlite3 = require('sqlite3').verbose();
 const dbPath = process.env.DB_PATH || './database/ai_company.db';
 const db = new sqlite3.Database(dbPath);
 
-router.get('/health-check', (req, res) => {
+// Health check endpoint (mounted at /api/health-check, so this is just '/')
+router.get('/', (req, res) => {
   // Check database connectivity
   db.get('SELECT 1', (err) => {
     if (err) {

@@ -160,11 +160,15 @@ class OrchestratoruAgent(BaseUAgent):
             if not bolt_response:
                 raise Exception("Head of Engineering agent failed to create Bolt prompt")
             
-            # Step 7: Finance analyzes revenue
+            # Step 7: Finance analyzes revenue (optional - won't block workflow)
             print(f"🎯 [{self.name}] Step 7: Finance analyzing revenue...")
             finance_response = await self.call_finance_agent(selected_idea, product_response)
             if not finance_response:
-                raise Exception("Finance agent failed to analyze revenue")
+                print(f"⚠️  [{self.name}] Finance agent not available, continuing without financial analysis...")
+                finance_response = {
+                    "warning": "Finance agent not available",
+                    "estimated_revenue": "To be determined"
+                }
             
             # Compile complete business plan
             complete_business_plan = {
@@ -183,6 +187,18 @@ class OrchestratoruAgent(BaseUAgent):
                 "finance": finance_response,
                 "all_ideas": [selected_idea]
             }
+            
+            print(f"🎯 [{self.name}] Workflow complete! Now creating PDR and triggering marketing...")
+            
+            # Step 8: Create PDR and auto-approve to trigger marketing posting
+            try:
+                pdr_result = await self.create_and_approve_pdr(selected_idea, product_response)
+                complete_business_plan["pdr_id"] = pdr_result.get("pdr_id")
+                complete_business_plan["marketing_posts"] = pdr_result.get("marketing_result")
+                print(f"✅ [{self.name}] PDR created and marketing posted! PDR ID: {pdr_result.get('pdr_id')}")
+            except Exception as e:
+                print(f"⚠️  [{self.name}] PDR creation/marketing failed (workflow still succeeded): {str(e)}")
+                complete_business_plan["pdr_warning"] = str(e)
             
             print(f"🎯 [{self.name}] Complete workflow finished successfully!")
             return complete_business_plan
@@ -306,7 +322,7 @@ class OrchestratoruAgent(BaseUAgent):
         try:
             response = requests.post(
                 f"http://localhost:{self.agent_ports['finance']}/analyze-revenue",
-                json={"idea_data": idea, "product_data": product},
+                json={"idea": idea, "product": product},
                 timeout=90
             )
             response.raise_for_status()
@@ -314,6 +330,49 @@ class OrchestratoruAgent(BaseUAgent):
         except Exception as e:
             print(f"❌ [{self.name}] Finance agent call failed: {e}")
             return None
+    
+    async def create_and_approve_pdr(self, idea: Dict[str, Any], product: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a PDR and auto-approve it to trigger marketing posting"""
+        try:
+            # Default API URL - adjust if needed
+            api_url = "http://localhost:5070"
+            
+            print(f"📝 [{self.name}] Creating PDR for product: {product.get('product_name', 'Unknown')}")
+            
+            # Step 1: Create PDR
+            create_response = requests.post(
+                f"{api_url}/api/agents/pdrs",
+                json={"idea": idea, "product": product},
+                timeout=30
+            )
+            create_response.raise_for_status()
+            pdr_data = create_response.json()
+            pdr_id = pdr_data.get("pdrId")
+            
+            print(f"✅ [{self.name}] PDR created with ID: {pdr_id}")
+            
+            # Step 2: Auto-approve PDR (this triggers marketing posting)
+            print(f"✅ [{self.name}] Auto-approving PDR {pdr_id} to trigger marketing...")
+            approve_response = requests.post(
+                f"{api_url}/api/agents/pdrs/{pdr_id}/approve",
+                timeout=180  # Marketing can take time
+            )
+            approve_response.raise_for_status()
+            approve_data = approve_response.json()
+            
+            print(f"🎉 [{self.name}] PDR approved! Marketing posts:")
+            print(f"   🐦 Twitter: {approve_data.get('postResp', {}).get('twitter', {}).get('status', 'N/A')}")
+            print(f"   💼 LinkedIn: {approve_data.get('postResp', {}).get('linkedin', {}).get('status', 'N/A')}")
+            
+            return {
+                "pdr_id": pdr_id,
+                "marketing_result": approve_data.get("postResp", {}),
+                "strategy": approve_data.get("strategy", {})
+            }
+            
+        except Exception as e:
+            print(f"❌ [{self.name}] PDR creation/approval failed: {str(e)}")
+            raise e
 
 # Create the agent instance
 orchestrator_agent = OrchestratoruAgent()

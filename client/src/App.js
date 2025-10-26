@@ -11,6 +11,7 @@ function App() {
   const [marketingStrategy, setMarketingStrategy] = useState(null);
   const [technicalStrategy, setTechnicalStrategy] = useState(null);
   const [boltPrompt, setBoltPrompt] = useState(null);
+  const [workflowStep, setWorkflowStep] = useState('initial'); // Track current workflow step
   const [agentActivity, setAgentActivity] = useState([]);
   const [currentAgent, setCurrentAgent] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -312,6 +313,9 @@ function App() {
       if (data.success && data.workflow) {
         const workflow = data.workflow;
         
+        // Set workflow step
+        setWorkflowStep(workflow.current_step || 'initial');
+        
         // Set up company idea
         const companyIdea = {
           id: companyId,
@@ -378,18 +382,62 @@ function App() {
           });
         }
         
-        if (workflow.current_step === 'approved') {
+        if (workflow.current_step === 'approved' || workflow.current_step === 'complete') {
           activity.push({
             id: 7,
             agent: 'Token Holders',
-            activity: 'PDR approved! Continuing with CMO and CTO agents...',
+            activity: 'PDR approved! CMO and CTO agents working...',
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        if (workflow.marketing_strategy) {
+          setMarketingStrategy(workflow.marketing_strategy);
+          activity.push({
+            id: 8,
+            agent: 'CMO Agent',
+            activity: 'Marketing strategy completed!',
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        if (workflow.technical_strategy) {
+          setTechnicalStrategy(workflow.technical_strategy);
+          activity.push({
+            id: 9,
+            agent: 'CTO Agent',
+            activity: 'Technical strategy completed!',
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        if (workflow.current_step === 'engineering' || workflow.current_step === 'complete') {
+          activity.push({
+            id: 10,
+            agent: 'Head of Engineering',
+            activity: workflow.current_step === 'complete' ? 'Bolt prompt created! Developer Agent ready.' : 'Creating Bolt prompt for website development...',
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        if (workflow.current_step === 'complete') {
+          activity.push({
+            id: 11,
+            agent: 'Developer Agent',
+            activity: '✅ Ready to build website! Click to open Bolt.diy',
+            timestamp: new Date().toISOString()
+          });
+          activity.push({
+            id: 12,
+            agent: 'System',
+            activity: '🎉 Complete workflow finished! All agents done!',
             timestamp: new Date().toISOString()
           });
         }
         
         if (workflow.current_step === 'rejected') {
           activity.push({
-            id: 8,
+            id: 13,
             agent: 'Token Holders',
             activity: 'PDR rejected. Workflow paused.',
             timestamp: new Date().toISOString()
@@ -398,11 +446,9 @@ function App() {
         
         setAgentActivity(activity);
         
-        // Auto-continue workflow if approved
-        if (workflow.current_step === 'approved' && !marketingStrategy && !technicalStrategy) {
-          setTimeout(() => {
-            triggerCMOAndCTO();
-          }, 1000);
+        // If workflow is complete, fetch the bolt prompt
+        if (workflow.current_step === 'complete') {
+          fetchBoltPromptForCompany(companyId);
         }
       }
     } catch (error) {
@@ -410,9 +456,47 @@ function App() {
     }
   };
 
+  // Fetch bolt prompt for a company
+  const fetchBoltPromptForCompany = async (companyId) => {
+    try {
+      console.log('🔍 [BOLT FETCH] Fetching bolt prompt for company:', companyId);
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const url = `${apiUrl}/api/database/companies/${companyId}`;
+      console.log('🔍 [BOLT FETCH] URL:', url);
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      console.log('🔍 [BOLT FETCH] Response data:', data);
+      console.log('🔍 [BOLT FETCH] data.success:', data.success);
+      console.log('🔍 [BOLT FETCH] data.company:', data.company);
+      console.log('🔍 [BOLT FETCH] data.company.boltPrompt:', data.company?.boltPrompt);
+      
+      if (data.success && data.company && data.company.boltPrompt) {
+        console.log('✅ [BOLT] Bolt prompt loaded for company', companyId, ':', data.company.boltPrompt.website_title);
+        console.log('✅ [BOLT] Prompt preview:', data.company.boltPrompt.bolt_prompt?.substring(0, 100));
+        setBoltPrompt(data.company.boltPrompt);
+      } else {
+        console.log('❌ [BOLT] No bolt prompt found for company', companyId);
+        console.log('❌ [BOLT] Setting boltPrompt to null');
+        setBoltPrompt(null);
+      }
+    } catch (error) {
+      console.error('❌ [BOLT] Error fetching bolt prompt:', error);
+    }
+  };
+
   // Vote on company workflow (PDR approval)
   const voteOnCompanyWorkflow = async (vote, feedback = '') => {
-    if (!selectedCompany) return;
+    console.log('🗳️ [VOTE] Button clicked! Vote:', vote, 'Company:', selectedCompany?.id);
+    
+    if (!selectedCompany) {
+      console.log('❌ [VOTE] No selected company!');
+      alert('Error: No company selected. Please try refreshing the page.');
+      return;
+    }
+    
+    console.log('🗳️ [VOTE] Sending vote request to backend...');
     
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001';
@@ -428,7 +512,9 @@ function App() {
         }),
       });
       
+      console.log('🗳️ [VOTE] Response status:', response.status);
       const data = await response.json();
+      console.log('🗳️ [VOTE] Response data:', data);
       
       if (data.success) {
         setAgentActivity(prev => [...prev, { 
@@ -442,18 +528,29 @@ function App() {
           setTimeout(() => {
             setAgentActivity(prev => [...prev, { 
               agent: 'System', 
-              action: 'PDR approved! Starting CMO and CTO agents...', 
+              action: 'PDR approved! CMO and CTO agents will start automatically...', 
               time: new Date().toLocaleTimeString() 
             }]);
-            triggerCMOAndCTO();
+            // Backend will automatically trigger CMO and CTO agents
+            // Reload workflow state after a delay to get the updated strategies
+            setTimeout(() => loadCompanyWorkflow(selectedCompany.id), 3000);
           }, 1000);
         }
         
         // Reload workflow state
         loadCompanyWorkflow(selectedCompany.id);
+      } else {
+        console.log('❌ [VOTE] Vote failed:', data.error);
+        alert(`Vote failed: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error voting on workflow:', error);
+      console.error('❌ [VOTE] Error voting on workflow:', error);
+      alert(`Error submitting vote: ${error.message}`);
+      setAgentActivity(prev => [...prev, { 
+        agent: 'System', 
+        action: `Error: ${error.message}`, 
+        time: new Date().toLocaleTimeString() 
+      }]);
     }
   };
 
@@ -1012,9 +1109,15 @@ function App() {
   // createBoltPrompt fallback function removed - using createBoltPromptWithData directly
 
   const getBoltUrl = () => {
+    console.log('🔧 [BOLT URL] boltPrompt state:', boltPrompt);
+    console.log('🔧 [BOLT URL] boltPrompt?.bolt_prompt:', boltPrompt?.bolt_prompt);
+    
     const rawPrompt = boltPrompt?.bolt_prompt ||
       'Build a modern, responsive website. Include homepage, features, pricing, about, contact pages.';
     const promptText = typeof rawPrompt === 'string' ? rawPrompt : JSON.stringify(rawPrompt);
+    
+    console.log('🔧 [BOLT URL] Using prompt (first 100 chars):', promptText.substring(0, 100));
+    
     const params = new URLSearchParams({
       prompt: promptText,
       autostart: '1',
@@ -1762,6 +1865,7 @@ function App() {
           marketingStrategy={marketingStrategy}
           technicalStrategy={technicalStrategy}
           boltPrompt={boltPrompt}
+          workflowStep={workflowStep}
           onOpenBolt={openBoltWithPrompt}
           onStartMarketing={startMarketingCampaign}
         />
@@ -1872,18 +1976,49 @@ function App() {
                         <div className="final-voting-section">
                           <h5>🗳️ Token Holder Decision Required:</h5>
                           <p>Approve this PDR to continue with CMO and CTO agents, or reject to pause the workflow.</p>
+                          <p style={{fontSize: '12px', color: '#666'}}>Company ID: {selectedCompany?.id} | Selected: {selectedCompany ? 'Yes' : 'No'}</p>
                           <div className="product-actions">
                             <button 
-                              onClick={() => voteOnCompanyWorkflow('approve')}
+                              onClick={() => {
+                                console.log('🔘 Button click handler fired!');
+                                voteOnCompanyWorkflow('approve');
+                              }}
                               className="final-approve-btn"
+                              style={{
+                                padding: '12px 24px',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                backgroundColor: '#28a745',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                minHeight: '50px'
+                              }}
+                              disabled={loading}
                             >
-                              ✅ APPROVE PDR
+                              {loading ? '⏳ Processing...' : '✅ APPROVE PDR'}
                             </button>
                             <button 
-                              onClick={() => voteOnCompanyWorkflow('reject')}
+                              onClick={() => {
+                                console.log('🔘 Reject button click handler fired!');
+                                voteOnCompanyWorkflow('reject');
+                              }}
                               className="final-reject-btn"
+                              style={{
+                                padding: '12px 24px',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                backgroundColor: '#dc3545',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                minHeight: '50px'
+                              }}
+                              disabled={loading}
                             >
-                              ❌ REJECT PDR
+                              {loading ? '⏳ Processing...' : '❌ REJECT PDR'}
                             </button>
                           </div>
                         </div>

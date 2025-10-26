@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
+const axios = require('axios');
 const ResearchAgent = require('../agents/ResearchAgent');
 const ProductAgent = require('../agents/ProductAgent');
 
@@ -487,5 +488,137 @@ async function startCompanyWorkflow(companyId, agent) {
     );
   }
 }
+
+// Approve PDR (Product Development Report) and trigger marketing
+router.post('/companies/:id/approve', async (req, res) => {
+  const companyId = req.params.id;
+  const { voter_id, feedback } = req.body;
+  
+  try {
+    console.log(`✅ [APPROVAL] PDR approval request for company ${companyId}`);
+    
+    // Get company data
+    const company = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM companies WHERE id = ?', [companyId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    
+    if (!company) {
+      return res.status(404).json({ success: false, error: 'Company not found' });
+    }
+    
+    // Get workflow state
+    const workflowState = await new Promise((resolve, reject) => {
+      db.get('SELECT * FROM company_workflow_state WHERE company_id = ?', [companyId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+    
+    if (!workflowState) {
+      return res.status(404).json({ success: false, error: 'Workflow state not found' });
+    }
+    
+    if (workflowState.current_step !== 'voting') {
+      return res.status(400).json({ 
+        success: false, 
+        error: `Cannot approve - workflow is in ${workflowState.current_step} step, must be in voting step` 
+      });
+    }
+    
+    // Record the approval vote
+    await new Promise((resolve, reject) => {
+      db.run(
+        'INSERT INTO company_workflow_votes (company_id, vote_type, vote, voter_id, feedback) VALUES (?, ?, ?, ?, ?)',
+        [companyId, 'product_approval', 'approve', voter_id || 'admin', feedback || 'Approved'],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+    
+    // Update workflow state to approved
+    await new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE company_workflow_state SET current_step = ?, status = ?, updated_at = CURRENT_TIMESTAMP WHERE company_id = ?',
+        ['approved', 'completed', companyId],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+    
+    console.log(`✅ [APPROVAL] PDR approved for company ${companyId}, triggering marketing...`);
+    
+    // Parse product data from workflow
+    let productData = {};
+    let ideaData = {};
+    
+    try {
+      if (workflowState.product_data) {
+        productData = JSON.parse(workflowState.product_data);
+      }
+      if (workflowState.research_data) {
+        const researchData = JSON.parse(workflowState.research_data);
+        ideaData = researchData.idea || {};
+      }
+    } catch (e) {
+      console.warn('⚠️ [APPROVAL] Error parsing workflow data:', e);
+    }
+    
+    // Build idea and product objects for marketing
+    const idea = {
+      id: companyId,
+      title: company.company_idea || company.name,
+      description: company.description || 'AI-powered innovation',
+      status: 'approved'
+    };
+    
+    const product = {
+      product_name: productData.product_name || company.name || 'New Product',
+      product_description: productData.product_description || company.description || 'Innovative solution',
+      features: productData.features || [],
+      target_market: productData.target_market || { segments: ['early adopters'] }
+    };
+    
+    // Call marketing strategy endpoint to auto-post
+    console.log(`📢 [APPROVAL] Calling marketing agent for company ${companyId}...`);
+    
+    let marketingResult = {};
+    try {
+      // Call the marketing endpoint internally via axios
+      const marketingResp = await axios.post('http://localhost:5001/api/agents/marketing-strategy', {
+        idea,
+        product,
+        publish: true
+      }, { timeout: 120000 });
+      
+      marketingResult = marketingResp.data;
+      console.log(`📢 [APPROVAL] Marketing completed for company ${companyId}:`, {
+        strategy: !!marketingResult.strategy,
+        posted: !!marketingResult.postResp
+      });
+    } catch (e) {
+      console.error('❌ [APPROVAL] Marketing call failed:', e?.response?.data || e.message);
+      marketingResult = { error: e?.response?.data || e.message };
+    }
+    
+    res.json({
+      success: true,
+      message: 'PDR approved and marketing initiated!',
+      company,
+      workflow_state: 'approved',
+      marketing_result: marketingResult
+    });
+    
+  } catch (error) {
+    console.error('❌ [APPROVAL] Error approving PDR:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 module.exports = router;

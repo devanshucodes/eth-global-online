@@ -9,7 +9,8 @@ const AgentFlow = ({
   product, 
   marketingStrategy, 
   technicalStrategy, 
-  boltPrompt, 
+  boltPrompt,
+  workflowStep,
   onOpenBolt, 
   onStartMarketing 
 }) => {
@@ -36,19 +37,19 @@ const AgentFlow = ({
       case 'ceo':
         return currentIdea ? 'completed' : 'waiting';
       case 'research':
-        return research ? 'completed' : currentIdea ? 'waiting' : 'waiting';
+        return research ? 'completed' : currentIdea ? 'active' : 'waiting';
       case 'product':
-        return product ? 'completed' : research ? 'waiting' : 'waiting';
+        return product ? 'completed' : research ? 'active' : 'waiting';
       case 'cmo':
-        return marketingStrategy ? 'completed' : product ? 'waiting' : 'waiting';
+        return marketingStrategy ? 'completed' : (workflowStep === 'approved' || workflowStep === 'engineering' || workflowStep === 'complete') ? 'active' : product ? 'waiting' : 'waiting';
       case 'cto':
-        return technicalStrategy ? 'completed' : product ? 'waiting' : 'waiting';
+        return technicalStrategy ? 'completed' : (workflowStep === 'approved' || workflowStep === 'engineering' || workflowStep === 'complete') ? 'active' : product ? 'waiting' : 'waiting';
       case 'head-eng':
-        return boltPrompt ? 'completed' : (marketingStrategy && technicalStrategy) ? 'waiting' : 'waiting';
+        return boltPrompt ? 'completed' : (workflowStep === 'engineering') ? 'active' : (marketingStrategy && technicalStrategy) ? 'waiting' : 'waiting';
       case 'marketing':
         return marketingStrategy ? 'active' : product ? 'waiting' : 'waiting';
       case 'developer':
-        return boltPrompt ? 'active' : 'waiting';
+        return boltPrompt ? 'active' : (workflowStep === 'complete') ? 'active' : 'waiting';
       default:
         return 'waiting';
     }

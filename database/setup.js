@@ -142,6 +142,22 @@ db.serialize(() => {
     )
   `);
 
+  // Posts table - store drafts/published posts and platform responses
+  db.run(`
+    CREATE TABLE IF NOT EXISTS posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      idea_id INTEGER,
+      agent_name TEXT,
+      content TEXT,
+      platforms TEXT,
+      media_urls TEXT,
+      status TEXT DEFAULT 'draft', -- draft | published | failed
+      ayr_response TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // CEO agents table (routes expect this)
   db.run(`
     CREATE TABLE IF NOT EXISTS ceo_agents (
@@ -173,6 +189,14 @@ db.serialize(() => {
       status TEXT DEFAULT 'launching',
       current_revenue REAL DEFAULT 0,
       launched_date DATETIME,
+      ceo_agent_name TEXT,
+      token_symbol TEXT,
+      company_idea TEXT,
+      description TEXT,
+      ceo_characteristics TEXT,
+      total_tokens INTEGER,
+      price_per_token REAL,
+      time_duration INTEGER,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (ceo_agent_id) REFERENCES ceo_agents (id)
@@ -189,6 +213,35 @@ db.serialize(() => {
       purchase_price REAL,
       purchase_date DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (ceo_agent_id) REFERENCES ceo_agents (id)
+    )
+  `);
+
+  // Company workflow state table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS company_workflow_state (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      company_id INTEGER NOT NULL,
+      current_step TEXT DEFAULT 'research',
+      research_data TEXT,
+      product_data TEXT,
+      status TEXT DEFAULT 'active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (company_id) REFERENCES companies (id)
+    )
+  `);
+
+  // Company workflow votes table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS company_workflow_votes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      company_id INTEGER NOT NULL,
+      vote_type TEXT NOT NULL,
+      vote TEXT NOT NULL,
+      voter_id TEXT,
+      feedback TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (company_id) REFERENCES companies (id)
     )
   `);
 });
