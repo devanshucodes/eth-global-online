@@ -10,7 +10,7 @@ const dbPath = process.env.DB_PATH || './database/ai_company.db';
 const db = new sqlite3.Database(dbPath);
 
 // Initialize agents
-const cmoAgent = new CMOAgent(process.env.ASI_ONE_API_KEY);
+const cmoAgent = new CMOAgent(process.env.ASI_ONE_API_KEY, process.env.AYRSHARE_API_KEY);
 const ctoAgent = new CTOAgent(process.env.ASI_ONE_API_KEY);
 const headOfEngineeringAgent = new HeadOfEngineeringAgent(process.env.ASI_ONE_API_KEY);
 
@@ -208,6 +208,10 @@ async function triggerMarketingAndTechnicalWorkflow(companyId) {
     console.log(`📢 [WORKFLOW] Starting CMO Agent for company ${companyId}...`);
     const marketingStrategy = await cmoAgent.developMarketingStrategy(idea, product, research);
     console.log(`✅ [WORKFLOW] CMO completed for company ${companyId}`);
+    
+    // Generate and post tweet to Twitter/X
+    console.log(`🐦 [WORKFLOW] CMO generating Twitter post for company ${companyId}...`);
+    await cmoAgent.generateAndPostTweet(product, marketingStrategy);
     
     console.log(`⚙️ [WORKFLOW] Starting CTO Agent for company ${companyId}...`);
     const technicalStrategy = await ctoAgent.developTechnicalStrategy(idea, product, research);

@@ -306,6 +306,16 @@ function App() {
   // Load company workflow state from database
   const loadCompanyWorkflow = async (companyId) => {
     try {
+      // 🔥 CLEAR ALL PREVIOUS STATE FIRST to prevent old company data from showing
+      console.log('🧹 [LOAD] Clearing previous company state before loading company:', companyId);
+      setBoltPrompt(null);
+      setResearch(null);
+      setProduct(null);
+      setMarketingStrategy(null);
+      setTechnicalStrategy(null);
+      setAgentActivity([]);
+      setWorkflowStep('initial');
+      
       const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001';
       const response = await fetch(`${apiUrl}/api/company-workflow/${companyId}`);
       const data = await response.json();

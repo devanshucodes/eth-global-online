@@ -1,10 +1,8 @@
 const ASIOneAgent = require('./ASIOneAgent');
-const SocialPoster = require('./socialPoster');
 
 class CMOAgent extends ASIOneAgent {
-  constructor(apiKey, ayrshareApiKey) {
+  constructor(apiKey) {
     super('CMO Agent', 'Marketing strategy and brand development', apiKey);
-    this.socialPoster = new SocialPoster(ayrshareApiKey);
   }
 
   async developMarketingStrategy(idea, product, research) {
@@ -199,45 +197,6 @@ Format your response as JSON:
       return fallbackStrategy;
     }
   }
-
-  async generateAndPostTweet(product, strategy) {
-    console.log('🐦 [CMO AGENT] Generating Twitter post for:', product.product_name);
-    
-    const tweetPrompt = `Create an engaging Twitter/X post (max 280 characters) to announce and promote this product:
-
-Product: ${product.product_name}
-Description: ${product.product_description}
-Key Message: ${strategy.brand_positioning}
-
-Make it catchy, engaging, and include relevant emojis. Do NOT use hashtags. Keep it under 280 characters.
-
-Respond with ONLY the tweet text, no quotes, no explanations.`;
-
-    try {
-      const tweetText = await this.generateResponse(tweetPrompt, 500);
-      const cleanTweet = tweetText.trim().replace(/^["']|["']$/g, '');
-      
-      console.log('🐦 [CMO AGENT] Generated tweet:', cleanTweet);
-      
-      const result = await this.socialPoster.postToTwitter(cleanTweet);
-      
-      if (result.success) {
-        console.log('✅ [CMO AGENT] Tweet posted successfully! Post ID:', result.postId);
-        await this.logActivity('Posted tweet to Twitter', { 
-          product_name: product.product_name,
-          post_id: result.postId
-        });
-      } else {
-        console.log('⚠️ [CMO AGENT] Tweet not posted:', result.reason || result.error);
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('❌ [CMO AGENT] Error generating/posting tweet:', error.message);
-      return { success: false, error: error.message };
-    }
-  }
-
 }
 
 module.exports = CMOAgent;
