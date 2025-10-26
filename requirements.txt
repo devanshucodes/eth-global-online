@@ -5,3 +5,8 @@ python-dotenv>=1.0.0
 pydantic>=2.0.0
 asyncio
 aiohttp>=3.8.0
+beautifulsoup4>=4.12.0
+pytrends>=4.9.0
+duckduckgo-search>=4.0.0
+lxml>=4.9.0
+html5lib>=1.1

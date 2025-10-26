@@ -1,6 +1,9 @@
 """
 Research uAgent for AI Company
-Conducts market research and competitive analysis
+Conducts market research and competitive analysis with real tools:
+- Web scraping
+- Google Trends analysis  
+- Web search (DuckDuckGo)
 """
 
 import json
@@ -8,6 +11,9 @@ import re
 from typing import List, Dict, Any
 from uagents import Context, Model
 from base_uagent import BaseUAgent
+from tools.web_scraper import WebScraper
+from tools.trends_analyzer import TrendsAnalyzer
+from tools.search_tool import SearchTool
 
 class ResearchRequest(Model):
     """Model for research request"""
@@ -40,7 +46,7 @@ class ResearchResponse(Model):
     recommendations: Recommendations
 
 class ResearchuAgent(BaseUAgent):
-    """Research uAgent for market research and competitive analysis"""
+    """Research uAgent for market research and competitive analysis with real tools"""
     
     def __init__(self):
         super().__init__(
@@ -48,6 +54,11 @@ class ResearchuAgent(BaseUAgent):
             role="Market research and competitive analysis",
             port=8002
         )
+        # Initialize tools
+        self.web_scraper = WebScraper()
+        self.trends_analyzer = TrendsAnalyzer()
+        self.search_tool = SearchTool()
+        print(f"🔧 [{self.name}] Tools initialized: WebScraper, TrendsAnalyzer, SearchTool")
         self.setup_handlers()
     
     def setup_handlers(self):
@@ -55,11 +66,84 @@ class ResearchuAgent(BaseUAgent):
         
         @self.agent.on_message(model=ResearchRequest)
         async def handle_research_request(ctx: Context, sender: str, msg: ResearchRequest):
-            """Conduct market research for a business idea"""
+            """Conduct market research for a business idea using real tools"""
             try:
                 print(f"🔍 [{self.name}] Starting research for idea: {msg.idea.get('title', 'Unknown')}")
                 
-                prompt = f"""As a market research specialist, analyze this business idea:
+                # Step 1: Use real tools to gather data
+                idea_title = msg.idea.get('title', 'Unknown')
+                idea_desc = msg.idea.get('description', 'No description')
+                
+                print(f"🔍 [{self.name}] Step 1: Searching for competitors...")
+                competitors_results = self.search_tool.search_competitors(
+                    industry=idea_title.split()[0] if idea_title else "tech",
+                    product_type=idea_title
+                )
+                
+                print(f"🔍 [{self.name}] Step 2: Analyzing market trends...")
+                trends_data = self.trends_analyzer.get_interest_over_time(
+                    keywords=[idea_title[:50]] if idea_title else ["technology"],
+                    timeframe='today 12-m'
+                )
+                
+                print(f"🔍 [{self.name}] Step 3: Getting related trends...")
+                related_queries = self.trends_analyzer.get_related_queries(
+                    keyword=idea_title[:50] if idea_title else "technology"
+                )
+                
+                print(f"🔍 [{self.name}] Step 4: Searching market size data...")
+                market_results = self.search_tool.search_market_size(
+                    industry=idea_title.split()[0] if idea_title else "tech"
+                )
+                
+                print(f"🔍 [{self.name}] Step 5: Searching industry news...")
+                news_results = self.search_tool.search_news(
+                    query=f"{idea_title} industry news",
+                    max_results=5
+                )
+                
+                # Step 2: Use LLM to analyze the collected data
+                tool_data = {
+                    'competitors_found': len(competitors_results),
+                    'competitor_urls': [r['url'] for r in competitors_results[:5]],
+                    'trends_status': trends_data.get('status'),
+                    'trends_data': trends_data.get('trends', {}),
+                    'related_queries_top': related_queries.get('top', [])[:5],
+                    'related_queries_rising': related_queries.get('rising', [])[:5],
+                    'market_insights': [r['title'] for r in market_results[:5]],
+                    'recent_news': [{'title': n['title'], 'date': n.get('date', 'N/A')} for n in news_results]
+                }
+                
+                print(f"🔍 [{self.name}] Step 6: Analyzing collected data with LLM...")
+                
+                prompt = f"""As a market research specialist, analyze this business idea using the REAL DATA collected from web searches, trends analysis, and news:
+
+BUSINESS IDEA:
+Title: {idea_title}
+Description: {idea_desc}
+Revenue Model: {msg.idea.get('revenue_model', 'No revenue model')}
+
+REAL DATA COLLECTED FROM TOOLS:
+1. Competitor Search Results ({tool_data['competitors_found']} found):
+{json.dumps(competitors_results[:5], indent=2)}
+
+2. Google Trends Analysis:
+- Status: {tool_data['trends_status']}
+- Trend Data: {json.dumps(tool_data['trends_data'], indent=2)}
+
+3. Related Rising Queries:
+{json.dumps(tool_data['related_queries_rising'], indent=2)}
+
+4. Related Top Queries:
+{json.dumps(tool_data['related_queries_top'], indent=2)}
+
+5. Market Size Insights Found:
+{json.dumps(tool_data['market_insights'], indent=2)}
+
+6. Recent Industry News:
+{json.dumps(tool_data['recent_news'], indent=2)}
+
+Based on this REAL DATA from actual web sources and trends, provide:
 
 Title: {msg.idea.get('title', 'Unknown')}
 Description: {msg.idea.get('description', 'No description')}
