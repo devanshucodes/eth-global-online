@@ -1,0 +1,43 @@
+AI COMPANY AGENT ADDRESSES FOR AGENTVERSE
+================================================================================
+
+CEO Agent:
+  Address: agent1qv0lcujw7djwcg9gw82rrrw4vmp55j2qz26ead384a258lgss8nvqh279lx
+  Port: 8001
+  Description: Generates and evaluates innovative business ideas using AI
+
+Research Agent (MeTTa):
+  Address: agent1q08qyq05wa024mndhsjpl50kalacr59jm06cu2t7t5m9e7603uv0gzxl8vr
+  Port: 8009
+  Description: Intelligent market research with MeTTa knowledge graphs and structured reasoning
+
+Product Agent:
+  Address: agent1qvaknm6aw5k67nxyf65krl05cgj4jeqrlyp8qd9y555yfk23d2p5uzw66al
+  Port: 8003
+  Description: Creates comprehensive product development reports and specifications
+
+CMO Agent:
+  Address: agent1qd25cfaz4c8faxwe9qhxufh2g0z6hnkys8hpu8xfwlp2nsntrc6kq08r5qq
+  Port: 8004
+  Description: Develops marketing strategies and brand positioning
+
+CTO Agent:
+  Address: agent1qfhvq5y7qztzcvft3u2jws3pm7l2d6syekkzlzeeu3fkjxpv5mjm68qudyy
+  Port: 8005
+  Description: Designs technical architecture and technology stack
+
+Head of Engineering Agent:
+  Address: agent1qwchvj8n55f048fr3a5xpqptu90hy3narju3y9fvf6pwa06zxfadqvnf3j3
+  Port: 8006
+  Description: Creates website specifications and Bolt.diy prompts
+
+Finance Agent:
+  Address: agent1qt5uqsx4y9jcpdksnpn5eg7aatzmf5jnuwfvrs3u95a0d02xty407ahrnr9
+  Port: 8007
+  Description: Performs financial analysis and revenue projections
+
+Workflow Orchestrator:
+  Address: agent1qt3x8564r2u6yw2qg6hucz03weclwfrzj4rkphnvlcstvk2j8wgx6r9hxlw
+  Port: 8008
+  Description: Coordinates complete business workflow across all agents
+

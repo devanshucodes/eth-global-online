@@ -15,20 +15,39 @@ load_dotenv()
 class BaseUAgent:
     """Base class for all AI Company uAgents"""
     
-    def __init__(self, name: str, role: str, port: int):
+    def __init__(self, name: str, role: str, port: int, seed_phrase: str = None):
         self.name = name
         self.role = role
         self.port = port
         self.api_key = os.getenv('ASI_ONE_API_KEY')
         self.base_url = 'https://api.asi1.ai/v1'
         
-        # Initialize the agent
-        self.agent = Agent(
-            name=name,
-            port=port,
-            mailbox=True,
-            publish_agent_details=True  # Register on Agentverse
-        )
+        # Load seed from private_keys.json if not provided
+        if not seed_phrase:
+            try:
+                with open(os.path.join(os.path.dirname(__file__), 'private_keys.json'), 'r') as f:
+                    keys = json.load(f)
+                    agent_keys = keys.get(name, {})
+                    seed_phrase = agent_keys.get('identity_key')
+            except Exception as e:
+                print(f"⚠️ [{name}] Could not load seed from private_keys.json: {e}")
+        
+        # Initialize the agent with proper Agentverse configuration
+        agent_config = {
+            "name": name,
+            "port": port,
+            "endpoint": [f"http://localhost:{port}/submit"],
+        }
+        
+        # Use seed for deterministic address (required for Agentverse)
+        if seed_phrase:
+            agent_config["seed"] = seed_phrase
+            print(f"✅ [{name}] Using deterministic seed for Agentverse registration")
+        
+        # Enable mailbox for Agentverse connectivity
+        agent_config["mailbox"] = True
+        
+        self.agent = Agent(**agent_config)
         
         if not self.api_key:
             raise ValueError(f"ASI_ONE_API_KEY not found for {name}")
